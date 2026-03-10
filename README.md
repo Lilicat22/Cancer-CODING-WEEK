@@ -4,11 +4,11 @@
 # Projet Cancer du Col de l'Utérus
 Application d'aide à la décision médicale pour évaluer le risque de cancer du col de l'utérus à partir de facteurs comportementaux et médicaux. Utilise un modèle de machine learning explicable avec SHAP.
 ## Équipe
-- Personne 1 (Lilicat22) : Structure, coordination, tests
-- Personne 2 : Data Processing & EDA
-- Personne 3 : Modèle Random Forest
-- Personne 4 : Modèle XGBoost
-- Personne 5 : Modèle SVM & Interface
+- Lilicat22 : Structure, coordination, tests
+- Lehvnxx : Data Processing & EDA
+- Wilfried-23 : Modèle Random Forest
+- JaurXs : Modèle XGBoost
+- Hansem01-boot : Modèle SVM & Interface
 
 ## Structure du projet
 ```
