@@ -45,16 +45,14 @@ python src/train_model.py
 streamlit run app/app.py
 ```
 
-Branches
-
-· main : version stable
-· feature/eda : Personne 2
-· feature/random-forest : Personne 3
-· feature/xgboost : Personne 4
-· feature/svm-interface : Personne 5
-
 ```
-
+## Branches
+- `main` : version stable
+- `feature/eda-p2` : pour Lehvnxx (EDA)
+- `feature/random-forest-p3` : pour Wilfried-23 (Random Forest)
+- `feature/xgboost-p4` : pour JaurXs (XGBoost)
+- `feature/svm-interface-p5` : pour Hansem01-boot (SVM + Interface)
+- `feature/tests-p1` : pour Lilicat22 (tests et coordination)
 ---
 
 ## Comment faire :
