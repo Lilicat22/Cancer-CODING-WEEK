@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 
 def load_data():
 
-    data_path = "data/gitprocessed_data.csv"
+    data_path = "data/processed_data.csv"
 
     df = pd.read_csv(data_path)
 
