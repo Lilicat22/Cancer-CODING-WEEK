@@ -5,12 +5,12 @@ from sklearn.preprocessing import StandardScaler
 
 def load_data():
 
-    data_path = "data/processed_data.csv"
+    data_path = "data/data.csv"
 
     df = pd.read_csv(data_path)
 
-    X = df.drop("target", axis=1)
-    y = df["target"]
+    X = df.drop("Biopsy", axis=1)
+    y = df["Biopsy"]
 
     return X, y
 
