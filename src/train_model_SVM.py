@@ -1,16 +1,17 @@
-# src/evaluate_model.py
+# src/train_model.py
 
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
+from sklearn.svm import SVC
 
 
-def evaluate(model, X_test, y_test):
+def train_svm(X_train, y_train):
 
-    y_pred = model.predict(X_test)
+    model = SVC(
+        kernel="rbf",
+        C=1.0,
+        gamma="scale",
+        probability=True
+    )
 
-    accuracy = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
-    matrix = confusion_matrix(y_test, y_pred)
+    model.fit(X_train, y_train)
 
-    return accuracy, report, matrix
+    return model

@@ -1,7 +1,7 @@
 # tests/test_train_model.py
 
 from src.data_processing_SVM import load_data, preprocess_data, split_data
-from src.train_model_SVM import train_svm
+from src.Train_model_SVM import train_svm
 
 
 def test_train_svm():
