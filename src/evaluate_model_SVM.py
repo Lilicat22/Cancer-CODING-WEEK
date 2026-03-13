@@ -1,24 +1,39 @@
 # src/evaluate_model.py
-import shap 
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
+import pandas as pd
+import joblib
+import shap
+
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
 
-def evaluate(model, X_test, y_test):
+def evaluate_model():
 
+    # Charger les données
+    X_test = pd.read_csv("../data/X_test_cleaned.csv")
+    y_test = pd.read_csv("../data/y_test_cleaned.csv")
+
+    y_test = y_test.squeeze()
+
+    # Charger le modèle
+    model = joblib.load("../models/svm_model.pkl")
+
+    # Prédictions
     y_pred = model.predict(X_test)
+    y_proba = model.predict_proba(X_test)[:,1]
 
-    accuracy = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
-    matrix = confusion_matrix(y_test, y_pred)
+    # Métriques
+    print("Accuracy:", accuracy_score(y_test, y_pred))
+    print("Precision:", precision_score(y_test, y_pred))
+    print("Recall:", recall_score(y_test, y_pred))
+    print("F1-score:", f1_score(y_test, y_pred))
+    print("ROC-AUC:", roc_auc_score(y_test, y_proba))
 
-    return accuracy, report, matrix
+    # SHAP
+    explainer = shap.KernelExplainer(model.predict_proba, shap.sample(X_test, 100))
+    shap_values = explainer.shap_values(X_test)
 
-def explain_model(model, X_train, y_train,X_test):
-    model = SVC(probability=True)
-    model = model.fit(X_train, y_train)
-    explainer = shap.KernelExplainer(model.predict_proba, X_train)
-    shap_values = explainer.shap_values(X_test[:20])
-    shap.summary_plot(shap_values, X_test[:20])
+    shap.summary_plot(shap_values[1], X_test)
+
+
+if __name__ == "__main__":
+    evaluate_model()

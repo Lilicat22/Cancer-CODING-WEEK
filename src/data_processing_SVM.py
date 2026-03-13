@@ -1,36 +1,36 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
+import os
+import pandas as pd
 
-def load_data():
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+data_path = os.path.join(BASE_DIR, "data")
 
-    data_path = "data/data.csv"
-
-    df = pd.read_csv(data_path)
-
-    X = df.drop("Biopsy", axis=1)
-    y = df["Biopsy"]
-
-    return X, y
+X_train_path = os.path.join(data_path, "X_train_cleaned.csv")
 
 
-def preprocess_data(X):
+# Chemins vers les fichiers nettoyés
+X_train_path = '../data/X_train_cleaned.csv'
+X_test_path = '../data/X_test_cleaned.csv'
+y_train_path = '../data/y_train_cleaned.csv'
+y_test_path = '../data/y_test_cleaned.csv'
 
-    scaler = StandardScaler()
+# Charger les datasets
+X_train = pd.read_csv(X_train_path)
+X_test = pd.read_csv(X_test_path)
+y_train = pd.read_csv(y_train_path)
+y_test = pd.read_csv(y_test_path)
 
-    X_scaled = scaler.fit_transform(X)
+# Si y_train est un DataFrame à une colonne, convertir en Series
+y_train = y_train.squeeze()
+y_test = y_test.squeeze()
 
-    return X_scaled
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
 
+from imblearn.over_sampling import SMOTE
 
-def split_data(X, y):
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=0.2,
-        random_state=42
-    )
-
-    return X_train, X_test, y_train, y_test
+smote = SMOTE(random_state=42)
+X_train_res, y_train_res = smote.fit_resample(X_train_scaled, y_train)
