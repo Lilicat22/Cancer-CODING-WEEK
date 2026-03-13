@@ -12,13 +12,19 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score
+import os
 
 
+# Construire un chemin absolu vers le fichier
+file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'data.csv')
+file_path = os.path.abspath(file_path)
+
+data = pd.read_csv(file_path)
 # ==============================
 # Charger la dataset
 # ==============================
 
-data = pd.read_csv("cervical_cancer.csv")
+data = pd.read_csv("data.csv")
 
 
 # ==============================
