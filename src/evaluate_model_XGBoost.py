@@ -4,6 +4,7 @@ import xgboost as xgb
 from sklearn.metrics import classification_report, accuracy_score
 import shap
 import matplotlib.pyplot as plt
+import pickle
 
 # Localisation des chemins
 script_dir = Path(__file__).resolve().parent
@@ -13,6 +14,11 @@ data_dir = root_dir / "data"
 # Charger le modèle sauvegardé
 model = xgb.XGBClassifier()
 model.load_model(data_dir / 'xgboost_model.json')
+
+# Sauvegarder le modèle en format pickle pour utilisation dans une app de prédiction
+with open(data_dir / 'xgboost_model.pkl', 'wb') as f:
+    pickle.dump(model, f)
+print("Modèle sauvegardé en format pickle : data/xgboost_model.pkl")
 
 # Charger les données de test
 X_test = pd.read_csv(data_dir / 'X_test_cleaned.csv')
