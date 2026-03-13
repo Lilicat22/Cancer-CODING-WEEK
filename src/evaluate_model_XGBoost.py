@@ -2,6 +2,8 @@ import pandas as pd
 from pathlib import Path
 import xgboost as xgb
 from sklearn.metrics import classification_report, accuracy_score
+import shap
+import matplotlib.pyplot as plt
 
 # Localisation des chemins
 script_dir = Path(__file__).resolve().parent
@@ -22,3 +24,13 @@ y_pred = model.predict(X_test)
 # Évaluation
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Calcul des valeurs SHAP
+explainer = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_test)
+
+# Afficher un résumé des valeurs SHAP
+shap.summary_plot(shap_values, X_test, show=False)
+plt.savefig(data_dir / 'shap_summary_plot.png')  # Sauvegarder le plot en PNG
+plt.show()  # Afficher le plot (si l'environnement le permet)
+print("SHAP summary plot généré et sauvegardé dans data/shap_summary_plot.png.")
