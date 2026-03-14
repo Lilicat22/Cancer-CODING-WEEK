@@ -1,104 +1,36 @@
-   # Tester le modèle
-# ==============================
-# Importer les bibliothèques
-# ==============================
+import joblib
+import shap
+import matplotlib.pyplot as plt
 
-import pandas as pd
-import numpy as np
+from sklearn.metrics import accuracy_score, confusion_matrix
 
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import roc_auc_score
-import os
+from src.data_processing_RandomForestClassifier import load_data
 
 
-# Construire un chemin absolu vers le fichier
-file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'data.csv')
-file_path = os.path.abspath(file_path)
+def evaluate_model():
 
-data = pd.read_csv(file_path)
-# ==============================
-# Charger la dataset
-# ==============================
+    X_train, X_test, y_train, y_test = load_data()
 
-data = pd.read_csv("data.csv")
+    model = joblib.load("model_random_forest.pkl")
 
+    predictions = model.predict(X_test)
 
-# ==============================
-# Nettoyer les données
-# ==============================
+    acc = accuracy_score(y_test, predictions)
 
-# remplacer les "?" par des valeurs manquantes
-data = data.replace("?", np.nan)
+    cm = confusion_matrix(y_test, predictions)
 
-# remplacer les valeurs manquantes par la médiane
-data = data.fillna(data.median())
+    print("Accuracy :", acc)
+    print("Confusion matrix :")
+    print(cm)
 
-# ==============================
-# Définir les variables
-# ==============================
+    explainer = shap.TreeExplainer(model)
 
-# X = toutes les variables sauf la cible
-X = data.drop("Biopsy", axis=1)
+    shap_values = explainer.shap_values(X_test)
 
-# y = variable cible
-y = data["Biopsy"]
+    shap.summary_plot(shap_values, X_test)
+
+    return acc, cm
 
 
-# ==============================
-# Séparer les données
-# ==============================
-
-X_train, X_test, y_train, y_test = train_test_split( X, y,test_size=0.2,random_state=42)
-
-
-# ==============================
-# Créer le modèle
-# ==============================
-
-model = RandomForestClassifier(n_estimators=200,random_state=42)
-
-
-# ==============================
-# Entraîner le modèle
-# ==============================
-
-model.fit(X_train, y_train)
-
-
-# ==============================
-# Faire les prédictions
-# ==============================
-
-y_pred = model.predict(X_test)
-
-
-# ==============================
-# évaluer le modèle
-# ==============================
-
-# Accuracy
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy :", accuracy)
-
-# Rapport complet
-print("\nClassification report :")
-print(classification_report(y_test, y_pred))
-
-# Matrice de confusion
-print("\nConfusion matrix :")
-print(confusion_matrix(y_test, y_pred))
-
-
-# ==============================
-# Score ROC-AUC
-# ==============================
-
-y_prob = model.predict_proba(X_test)[:,1]
-
-roc_score = roc_auc_score(y_test, y_prob)
-
-print("\nROC-AUC :", roc_score)
+if __name__ == "__main__":
+    evaluate_model()
