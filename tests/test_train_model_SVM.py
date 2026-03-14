@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.data_processing_SVM import load_data
-from src.Train_model_SVM import train_svm
+from src.train_model_SVM import train_svm
 from src.evaluate_model_SVM import evaluate_model
 from src.evaluate_model_SVM import shap_analysis
 

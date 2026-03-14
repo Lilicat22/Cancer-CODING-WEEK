@@ -1,61 +1,79 @@
-import pandas as pd
-from pathlib import Path
-import xgboost as xgb
-from sklearn.metrics import classification_report, accuracy_score
+﻿"""XGBoost training script.
+
+Ce module expose `train_xgboost` pour être utilisé par les tests et autres scripts.
+
+Usage :
+    python -m src.train_model_XGBoost
+"""
+
+from __future__ import annotations
+
 import joblib
+from pathlib import Path
+import pandas as pd
+import xgboost as xgb
 
-# chemins du projet
-script_dir = Path(__file__).resolve().parent
-root_dir = script_dir.parent
-data_dir = root_dir / "data"
-models_dir = root_dir / "models"
 
-# créer le dossier models s'il n'existe pas
-models_dir.mkdir(exist_ok=True)
+def load_data():
+    """Charge les jeux de données déjà splittés ou crée le split si nécessaire."""
 
-# Charger les données
-X_train = pd.read_csv(data_dir / "X_train_cleaned.csv")
-y_train = pd.read_csv(data_dir / "y_train_cleaned.csv").squeeze()
+    root_dir = Path(__file__).resolve().parent.parent
+    data_dir = root_dir / "data"
 
-X_test = pd.read_csv(data_dir / "X_test_cleaned.csv")
-y_test = pd.read_csv(data_dir / "y_test_cleaned.csv").squeeze()
+    xtrain_path = data_dir / "X_train_cleaned.csv"
+    ytrain_path = data_dir / "y_train_cleaned.csv"
+    xtest_path = data_dir / "X_test_cleaned.csv"
+    ytest_path = data_dir / "y_test_cleaned.csv"
 
-# 🔹 Features sélectionnées
-selected_features = [
-    "Schiller",
-    "Age",
-    "Hormonal Contraceptives",
-    "Num of pregnancies",
-    "Number of sexual partners"
-]
+    if xtrain_path.exists() and ytrain_path.exists() and xtest_path.exists() and ytest_path.exists():
+        X_train = pd.read_csv(xtrain_path)
+        y_train = pd.read_csv(ytrain_path).squeeze()
+        X_test = pd.read_csv(xtest_path)
+        y_test = pd.read_csv(ytest_path).squeeze()
+    else:
+        raise FileNotFoundError(
+            "Fichiers de données absents. Exécutez d'abord le prétraitement pour générer les fichiers de train/test."
+        )
 
-# Garder uniquement ces colonnes
-X_train = X_train[selected_features]
-X_test = X_test[selected_features]
+    return X_train, X_test, y_train, y_test
 
-print("Features utilisées :", X_train.columns.tolist())
 
-# Création du modèle
-model = xgb.XGBClassifier(
-    objective="binary:logistic",
-    n_estimators=100,
-    random_state=42
-)
+def train_xgboost(X_train, y_train, save_model: bool = True):
+    """Entraîne un modèle XGBoost et le sauvegarde."""
 
-# Entraînement
-model.fit(X_train, y_train)
+    selected_features = [
+        "Schiller",
+        "Age",
+        "Hormonal Contraceptives",
+        "Num of pregnancies",
+        "Number of sexual partners"
+    ]
 
-# Prédictions
-y_pred = model.predict(X_test)
+    X_train = X_train[selected_features]
 
-# Evaluation
-print("\nAccuracy :", accuracy_score(y_test, y_pred))
-print("\nClassification report :")
-print(classification_report(y_test, y_pred))
+    model = xgb.XGBClassifier(
+        objective="binary:logistic",
+        n_estimators=100,
+        random_state=42
+    )
 
-# 🔹 Sauvegarde du modèle dans models
-model_path = models_dir / "xgboost_model.pkl"
+    model.fit(X_train, y_train)
 
-joblib.dump(model, model_path)
+    if save_model:
+        root_dir = Path(__file__).resolve().parent.parent
+        models_dir = root_dir / "models"
+        models_dir.mkdir(exist_ok=True)
+        model_path = models_dir / "xgboost_model.pkl"
+        joblib.dump(model, model_path)
+        print(f"✅ Modèle sauvegardé dans : {model_path}")
 
-print(f"\n✅ Modèle sauvegardé dans : {model_path}")
+    return model
+
+
+def main() -> None:
+    X_train, X_test, y_train, y_test = load_data()
+    train_xgboost(X_train, y_train)
+
+
+if __name__ == "__main__":
+    main()
