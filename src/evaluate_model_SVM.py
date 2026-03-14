@@ -1,39 +1,48 @@
 # src/evaluate_model.py
-import pandas as pd
-import joblib
+
+import matplotlib.pyplot as plt
 import shap
 
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import ConfusionMatrixDisplay
 
 
-def evaluate_model():
+def evaluate_model(model, X_test, y_test):
 
-    # Charger les données
-    X_test = pd.read_csv("../data/X_test_cleaned.csv")
-    y_test = pd.read_csv("../data/y_test_cleaned.csv")
+    """
+    Evaluation du modèle
+    """
 
-    y_test = y_test.squeeze()
-
-    # Charger le modèle
-    model = joblib.load("../models/svm_model.pkl")
-
-    # Prédictions
     y_pred = model.predict(X_test)
-    y_proba = model.predict_proba(X_test)[:,1]
 
-    # Métriques
-    print("Accuracy:", accuracy_score(y_test, y_pred))
-    print("Precision:", precision_score(y_test, y_pred))
-    print("Recall:", recall_score(y_test, y_pred))
-    print("F1-score:", f1_score(y_test, y_pred))
-    print("ROC-AUC:", roc_auc_score(y_test, y_proba))
+    print("\nClassification Report\n")
+    print(classification_report(y_test, y_pred))
 
-    # SHAP
-    explainer = shap.KernelExplainer(model.predict_proba, shap.sample(X_test, 100))
-    shap_values = explainer.shap_values(X_test)
+    cm = confusion_matrix(y_test, y_pred)
 
-    shap.summary_plot(shap_values[1], X_test)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+
+    disp.plot()
+
+    plt.title("Confusion Matrix")
+
+    plt.show()
+
+    return y_pred
 
 
-if __name__ == "__main__":
-    evaluate_model()
+def shap_analysis(model, X_train, X_test):
+
+    """
+    Analyse SHAP pour importance des variables
+    """
+
+    explainer = shap.KernelExplainer(
+        model.predict_proba,
+        shap.sample(X_train, 100)
+    )
+
+    shap_values = explainer.shap_values(X_test[:50])
+
+    shap.summary_plot(shap_values, X_test[:50])
