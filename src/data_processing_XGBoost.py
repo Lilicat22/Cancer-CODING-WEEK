@@ -1,74 +1,60 @@
 import pandas as pd
 from pathlib import Path
-import os
 from sklearn.model_selection import train_test_split
-import numpy as np
 
-# 1. LOCALISATION AUTOMATIQUE
-# __file__ est le chemin vers ce script
-script_dir = Path(__file__).resolve().parent
-# On remonte d'un niveau pour sortir de 'src' et arriver à la racine 'Cancer-CODING-WEEK'
-root_dir = script_dir.parent
-data_dir = root_dir / "data"
 
-print("--- 🔍 DIAGNOSTIC DES CHEMINS ---")
-print(f"📍 Dossier du script : {script_dir}")
-print(f"📁 Racine du projet  : {root_dir}")
-print(f"📦 Dossier data visé : {data_dir}")
+# chemin des données
+data_dir = Path("data")
+raw_path = data_dir / "risk_factors_cervical_cancer.csv"
 
-# 2. VÉRIFICATION RÉELLE DU CONTENU
-if data_dir.exists():
-    print(f"✅ Dossier 'data' trouvé !")
-    print(f"📄 Fichiers vus : {os.listdir(data_dir)}")
+
+def load_data():
+    """Charge le dataset brut et sépare X et y"""
+    
+    if not raw_path.exists():
+        raise FileNotFoundError(f"Fichier source introuvable : {raw_path}")
+
+    df = pd.read_csv(raw_path)
+
+    X = df.drop(columns=["Biopsy"])
+    y = df["Biopsy"]
+
+    return X, y
+
+
+# chemins des fichiers splittés
+xtrain_path = data_dir / "X_train_cleaned.csv"
+ytrain_path = data_dir / "y_train_cleaned.csv"
+xtest_path = data_dir / "X_test_cleaned.csv"
+ytest_path = data_dir / "y_test_cleaned.csv"
+
+
+if xtrain_path.exists() and ytrain_path.exists() and xtest_path.exists() and ytest_path.exists():
+
+    print("ℹ️ Fichiers splittés déjà présents. Chargement...")
+
+    X_train = pd.read_csv(xtrain_path)
+    y_train = pd.read_csv(ytrain_path).squeeze()
+
+    X_test = pd.read_csv(xtest_path)
+    y_test = pd.read_csv(ytest_path).squeeze()
+
 else:
-    print(f"❌ Erreur : Le dossier 'data' n'existe pas à l'adresse : {data_dir}")
-    exit(1)  # Arrêter si le dossier n'existe pas
 
-# 3. CHARGEMENT ET PRÉTRAITEMENT DES DONNÉES BRUTES
-raw_data_path = data_dir / 'risk_factors_cervical_cancer.csv'
-if not raw_data_path.exists():
-    print(f"❌ Erreur : Le fichier 'risk_factors_cervical_cancer.csv' n'existe pas dans {data_dir}")
-    exit(1)
+    print("ℹ️ Chargement du dataset brut")
 
-# Charger les données brutes
-data = pd.read_csv(raw_data_path)
+    X, y = load_data()
 
-# Remplacer les '?' par NaN et remplir avec la médiane
-data = data.replace('?', np.nan)
-data = data.fillna(data.median(numeric_only=True))
+    print("ℹ️ Création du train/test split")
 
-# Assumer que la colonne cible est 'Biopsy' (ajuster si nécessaire)
-if 'Biopsy' not in data.columns:
-    print("❌ Erreur : Colonne 'Biopsy' non trouvée dans les données.")
-    exit(1)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-X = data.drop("Biopsy", axis=1)
-y = data["Biopsy"]
+    X_train.to_csv(xtrain_path, index=False)
+    y_train.to_csv(ytrain_path, index=False)
 
-# Séparation en train/test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_test.to_csv(xtest_path, index=False)
+    y_test.to_csv(ytest_path, index=False)
 
-# Sauvegarder les données nettoyées
-X_train.to_csv(data_dir / 'X_train_cleaned.csv', index=False)
-y_train.to_csv(data_dir / 'y_train_cleaned.csv', index=False)
-X_test.to_csv(data_dir / 'X_test_cleaned.csv', index=False)
-y_test.to_csv(data_dir / 'y_test_cleaned.csv', index=False)
-
-print("✅ Données nettoyées et sauvegardées avec succès !")
-
-# 4. CHARGEMENT SÉCURISÉ (maintenant que les fichiers existent)
-try:
-    # On construit le chemin complet vers chaque fichier
-    X_train = pd.read_csv(data_dir / 'X_train_cleaned.csv')
-    print("✅ X_train chargé avec succès !")
-    
-    # Si le premier passe, on peut charger les autres
-    Y_train = pd.read_csv(data_dir / 'y_train_cleaned.csv').squeeze()
-    X_test = pd.read_csv(data_dir / 'X_test_cleaned.csv')
-    Y_test = pd.read_csv(data_dir / 'y_test_cleaned.csv').squeeze()
-    
-    print("\n🚀 TOUT EST PRÊT ! Voici un aperçu des données :")
-    print(X_train.head())
-
-except Exception as e:
-    print(f"\n💥 ÉCHEC FINAL : {e}")
+    print("✅ Données sauvegardées avec succès")

@@ -2,8 +2,9 @@ import pandas as pd
 from pathlib import Path
 import xgboost as xgb
 from sklearn.metrics import classification_report, accuracy_score
+import joblib
 
-# Localisation des chemins (comme dans data_processing_XGBoost.py)
+# ...existing code...
 script_dir = Path(__file__).resolve().parent
 root_dir = script_dir.parent
 data_dir = root_dir / "data"
@@ -22,6 +23,9 @@ model.fit(X_train, y_train)
 
 # Prédictions sur l'ensemble de test
 y_pred = model.predict(X_test)
-# Sauvegarder le modèle pour l'évaluation
+
+# Sauvegarder le modèle pour réutilisation (streamlit/flask)
 model.save_model(data_dir / 'xgboost_model.json')
-print("Modèle sauvegardé dans data/xgboost_model.json")
+joblib.dump(model, data_dir / 'xgboost_model.joblib')
+
+print("Modèle sauvegardé dans data/xgboost_model.json et data/xgboost_model.joblib")
