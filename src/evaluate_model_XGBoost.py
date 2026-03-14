@@ -6,14 +6,12 @@ import shap
 import matplotlib.pyplot as plt
 import pickle
 
-# Localisation des chemins
-script_dir = Path(__file__).resolve().parent
-root_dir = script_dir.parent
-data_dir = root_dir / "data"
+# chemin vers data
+data_dir = Path(__file__).resolve().parent.parent / "data"
 
-# Charger le modèle sauvegardé
+# charge modèle XGBoost déjà entraîné
 model = xgb.XGBClassifier()
-model.load_model(data_dir / 'xgboost_model.json')
+model.load_model(data_dir / "xgboost_model.json")
 
 # Sauvegarder le modèle en format pickle pour utilisation dans une app de prédiction
 with open(data_dir / 'xgboost_model.pkl', 'wb') as f:
@@ -24,10 +22,8 @@ print("Modèle sauvegardé en format pickle : data/xgboost_model.pkl")
 X_test = pd.read_csv(data_dir / 'X_test_cleaned.csv')
 y_test = pd.read_csv(data_dir / 'y_test_cleaned.csv').squeeze()
 
-# Prédictions sur l'ensemble de test
+# evaluation
 y_pred = model.predict(X_test)
-
-# Évaluation
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
 

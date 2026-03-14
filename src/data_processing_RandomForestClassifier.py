@@ -1,32 +1,32 @@
-# Importation des bibliothèques nécessaires
 import pandas as pd
-import numpy as np
+import os
 
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
 
-# Chargement de la dataset
-data = pd.read_csv("cervical_cancer.csv")
+def optimize_memory(df):
+    """
+    Reduce memory usage by converting datatypes
+    """
+    for col in df.columns:
 
-# Afficher les premières lignes
-print(data.head())
+        if df[col].dtype == "float64":
+            df[col] = df[col].astype("float32")
 
-# Informations sur les colonnes et les types de données
-print(data.info())
+        elif df[col].dtype == "int64":
+            df[col] = df[col].astype("int32")
 
-# Statistiques générales
-print(data.describe())
+    return df
 
-# Remplacer les valeurs manquantes par la médiane
-data = data.replace('?', np.nan)
-data = data.fillna(data.median())
 
-# Variables explicatives
-X = data.drop("Biopsy", axis=1)
+def load_data():
+    base_path = os.path.join(os.path.dirname(__file__), "../data")
 
-# Variable cible
-y = data["Biopsy"]
+    X_train = pd.read_csv(os.path.join(base_path, "X_train_cleaned.csv"))
+    X_test = pd.read_csv(os.path.join(base_path, "X_test_cleaned.csv"))
 
-# Séparation des données
-X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2,random_state=42)
+    y_train = pd.read_csv(os.path.join(base_path, "y_train_cleaned.csv"))
+    y_test = pd.read_csv(os.path.join(base_path, "y_test_cleaned.csv"))
+
+    X_train = optimize_memory(X_train)
+    X_test = optimize_memory(X_test)
+
+    return X_train, X_test, y_train.values.ravel(), y_test.values.ravel()
