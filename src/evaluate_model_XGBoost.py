@@ -1,9 +1,10 @@
 import pandas as pd
 from pathlib import Path
 import xgboost as xgb
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import classification_report, accuracy_score
 import shap
 import matplotlib.pyplot as plt
+import pickle
 
 # chemin vers data
 data_dir = Path(__file__).resolve().parent.parent / "data"
@@ -12,21 +13,26 @@ data_dir = Path(__file__).resolve().parent.parent / "data"
 model = xgb.XGBClassifier()
 model.load_model(data_dir / "xgboost_model.json")
 
-# charge ensemble test
-X_test = pd.read_csv(data_dir / "X_test_cleaned.csv")
-y_test = pd.read_csv(data_dir / "y_test_cleaned.csv").squeeze()
+# Sauvegarder le modèle en format pickle pour utilisation dans une app de prédiction
+with open(data_dir / 'xgboost_model.pkl', 'wb') as f:
+    pickle.dump(model, f)
+print("Modèle sauvegardé en format pickle : data/xgboost_model.pkl")
+
+# Charger les données de test
+X_test = pd.read_csv(data_dir / 'X_test_cleaned.csv')
+y_test = pd.read_csv(data_dir / 'y_test_cleaned.csv').squeeze()
 
 # evaluation
 y_pred = model.predict(X_test)
 print("Accuracy:", accuracy_score(y_test, y_pred))
-print(classification_report(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
 
-# SHAP : importance des features (bar chart)
+# Calcul des valeurs SHAP
 explainer = shap.TreeExplainer(model)
-shap_values = explainer(X_test)   # nouvelle API SHAP
-shap.plots.bar(shap_values, max_display=10, show=False)  # top 10 features
-plt.tight_layout()
-plt.savefig(data_dir / "shap_summary_bar_plot.png")
-plt.close()
+shap_values = explainer.shap_values(X_test)
 
-print("SHAP chart saved:", data_dir / "shap_summary_bar_plot.png")
+# Afficher un résumé des valeurs SHAP
+shap.summary_plot(shap_values, X_test, show=False)
+plt.savefig(data_dir / 'shap_summary_plot.png')  # Sauvegarder le plot en PNG
+plt.show()  # Afficher le plot (si l'environnement le permet)
+print("SHAP summary plot généré et sauvegardé dans data/shap_summary_plot.png.")
