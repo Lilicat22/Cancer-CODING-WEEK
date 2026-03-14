@@ -1,36 +1,29 @@
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
+# src/data_processing.py
 
+# src/data_processing.py
+
+import pandas as pd
 import os
-import pandas as pd
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-data_path = os.path.join(BASE_DIR, "data")
-
-X_train_path = os.path.join(data_path, "X_train_cleaned.csv")
 
 
-# Chemins vers les fichiers nettoyés
-X_train_path = '../data/X_train_cleaned.csv'
-X_test_path = '../data/X_test_cleaned.csv'
-y_train_path = '../data/y_train_cleaned.csv'
-y_test_path = '../data/y_test_cleaned.csv'
+def load_data():
 
-# Charger les datasets
-X_train = pd.read_csv(X_train_path)
-X_test = pd.read_csv(X_test_path)
-y_train = pd.read_csv(y_train_path)
-y_test = pd.read_csv(y_test_path)
+    """
+    Charge les datasets nettoyés depuis le dossier data
+    """
 
-# Si y_train est un DataFrame à une colonne, convertir en Series
-y_train = y_train.squeeze()
-y_test = y_test.squeeze()
+    base_path = os.path.dirname(os.path.dirname(__file__))
 
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+    data_path = os.path.join(base_path, "data")
 
-from imblearn.over_sampling import SMOTE
+    X_train = pd.read_csv(os.path.join(data_path, "X_train_cleaned.csv"))
+    X_test = pd.read_csv(os.path.join(data_path, "X_test_cleaned.csv"))
 
-smote = SMOTE(random_state=42)
-X_train_res, y_train_res = smote.fit_resample(X_train_scaled, y_train)
+    y_train = pd.read_csv(os.path.join(data_path, "y_train.csv"))
+    y_test = pd.read_csv(os.path.join(data_path, "y_test.csv"))
+
+    # convertir en vecteur
+    y_train = y_train.values.ravel()
+    y_test = y_test.values.ravel()
+
+    return X_train, X_test, y_train, y_test
