@@ -1,8 +1,12 @@
+import os
 import joblib
 
 from sklearn.ensemble import RandomForestClassifier
 
-from data_processing_RandomForestClassifier import load_data
+try:
+    from .data_processing_RandomForestClassifier import load_data
+except ImportError:  # pragma: no cover
+    from data_processing_RandomForestClassifier import load_data
 
 
 def train_model():
@@ -19,7 +23,11 @@ def train_model():
 
     model.fit(X_train, y_train)
 
-    joblib.dump(model, "model_random_forest.pkl")
+    base_path = os.path.dirname(os.path.dirname(__file__))
+    model_dir = os.path.join(base_path, "models")
+    os.makedirs(model_dir, exist_ok=True)
+    model_path = os.path.join(model_dir, "model_random_forest.pkl")
+    joblib.dump(model, model_path)
 
     return model
 

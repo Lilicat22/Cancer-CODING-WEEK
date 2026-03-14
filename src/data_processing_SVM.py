@@ -1,4 +1,4 @@
-# src/data_processing.py
+﻿# src/data_processing.py
 
 # src/data_processing.py
 
@@ -27,3 +27,14 @@ def load_data():
     y_test = y_test.values.ravel()
 
     return X_train, X_test, y_train, y_test
+
+
+def preprocess_data(X):
+    """Applique un scaling standard sur les features."""
+
+    from sklearn.preprocessing import StandardScaler
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    return X_scaled
